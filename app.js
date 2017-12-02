@@ -25,17 +25,64 @@ var bot = new builder.UniversalBot(connector);
 // Listen for messages from users
 server.post('/api/messages', connector.listen());
 
+bot.on('conversationUpdate', function (message) {
+    if (message.membersAdded && message.membersAdded.length > 0) {
+        // Say hello
+        var reply = new builder.Message()
+                .address(message.address)
+                .text("Hello! How is your day so far?");
+        bot.send(reply);
+    } else if (message.membersRemoved) {
+        // See if bot was removed
+        var botId = message.address.bot.id;
+        for (var i = 0; i < message.membersRemoved.length; i++) {
+            if (message.membersRemoved[i].id === botId) {
+                // Say goodbye
+                var reply = new builder.Message()
+                        .address(message.address)
+                        .text("Goodbye");
+                bot.send(reply);
+                break;
+            }
+        }
+    }
+});
+
 bot.dialog('/', function(session) {
-  session.send("You said: %s", session.message.text);
         sendGetSentimentRequest(session.message.text).then(function (parsedBody) {
             console.log(parsedBody);
-            session.send(parsedBody.documents[0].score.toString());
+            var sentimentValue = parsedBody.documents[0].score;
+
+            if(parsedBody.documents[0].score < 0.1) {
+              session.beginDialog("/crisis");
+            }
         })
         .catch(function (err) {
             console.log("POST FAILED: " + err);
         });
-
   });
+
+  bot.dialog("/crisis", [
+  	function(session) {
+  		var question = "";
+  		if(session.message.text.includes("suicidal")) {
+  			question = "Could you do me a favour and call this helpline: 1-833-456-4566?";
+  		} else if(session.message.text.includes("sad")) {
+  			question = "Could you do me a favour and text a friend.";
+  		} else if(session.message.text.includes("depressed")) {
+  			question = "Could you do me a favour and set up an appointment with a professional.";
+  		}
+  		builder.Prompts.text(session, question);
+  	},
+
+  	function(session, results) {
+  		session.send("Thank you. Remember that you are important, strong and you can get through this. This is just a temporary feeling! You can get through this.");
+  		session.endDialog();
+  	}
+  ]);
+
+
+
 
 function sendGetSentimentRequest(message) {
     var options = {
