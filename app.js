@@ -5,7 +5,7 @@ var MICROSOFT_APP_ID = '2b72e45a-84b0-4f50-8615-e80cdcb7068c';
 var MICROSOFT_APP_PASSWORD = 'oqwrIM3244!@pckKXBJM8?]';
 
 var headers = {'Content-Type':'application/json', 'Ocp-Apim-Subscription-Key':'300e68bffa5449dfb895b55982140de7'}
-var requestUrl = 'https://[location].api.cognitive.microsoft.com/text/analytics/v2.0/sentiment';
+var requestUrl = 'https://westus.api.cognitive.microsoft.com/text/analytics/v2.0/sentiment';
 
 // Setup Restify Server
 var server = restify.createServer();
