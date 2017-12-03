@@ -6,7 +6,7 @@ var rp = require('request-promise');
 var MICROSOFT_APP_ID = '2b72e45a-84b0-4f50-8615-e80cdcb7068c';
 var MICROSOFT_APP_PASSWORD = 'oqwrIM3244!@pckKXBJM8?]';
 
-var header = {'Content-Type':'application/json', 'Ocp-Apim-Subscription-Key':'300e68bffa5449dfb895b55982140de7'}
+var header = {'Content-Type':'application/json', 'Ocp-Apim-Subscription-Key':'6fb7959510a84e389985fd3343705e6b'}
 var requestUrl = 'https://westus.api.cognitive.microsoft.com/text/analytics/v2.0/sentiment';
 
 // Setup Restify Server
@@ -24,6 +24,16 @@ var connector = new builder.ChatConnector({
 var bot = new builder.UniversalBot(connector);
 // Listen for messages from users
 server.post('/api/messages', connector.listen());
+
+// Bot introduces itself and says hello upon conversation start
+bot.on('conversationUpdate', function (message) {
+    if (message.membersAdded[0].id === message.address.bot.id) {
+        var reply = new builder.Message()
+                .address(message.address)
+                .text("Hello, I'm careBOTyou! How's your day going?");
+        bot.send(reply);
+    }
+});
 
 bot.dialog('/', function(session) {
   session.send("You said: %s", session.message.text);
